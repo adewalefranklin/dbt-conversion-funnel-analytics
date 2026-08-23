@@ -1,0 +1,17 @@
+version: 2
+
+# Raw CRM tables live in the `assignment` schema of the DuckDB file.
+# The five sources are declared so you can reference them with
+# {{ source('assignment', 'LEAD') }} etc. Feel free to enrich this file
+# with descriptions, freshness, and source tests as part of your solution.
+
+sources:
+  - name: assignment
+    database: interview_assignment   # DuckDB catalog name (= file stem)
+    schema: assignment
+    tables:
+      - name: LEAD
+      - name: OPPORTUNITY
+      - name: SUBSCRIPTION__C
+      - name: DELIVERY__C
+      - name: ACCOUNT

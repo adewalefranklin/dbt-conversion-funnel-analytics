@@ -1,0 +1,191 @@
+version: 2
+
+models:
+
+  - name: stg_lead
+    description: >
+      Cleaned and deduplicated Lead records at one row per lead_id.
+      Duplicate source Lead IDs are resolved deterministically using the
+      earliest created_date.
+
+    columns:
+      - name: lead_id
+        description: Unique identifier of the lead.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: status
+        description: Current source-system lead status.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Lost
+                  - New
+                  - Qualified
+                  - Unqualified
+
+      - name: is_converted
+        description: Source-system conversion flag.
+        data_tests:
+          - not_null
+
+
+  - name: stg_account
+    description: >
+      Cleaned and deduplicated patient/customer accounts at one row
+      per account_id. Duplicate source records are resolved using the
+      earliest created_date.
+
+    columns:
+      - name: account_id
+        description: Unique identifier of the patient/customer account.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: brand
+        description: Brand associated with the account.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Prosenio
+                  - PflegeBox
+                  - Sanubi
+                  - SanBox
+
+
+  - name: stg_opportunity
+    description: >
+      Opportunity records at one row per opportunity_id.
+      Raw stage values are preserved while stage_name is standardized
+      for casing and whitespace inconsistencies.
+
+    columns:
+      - name: opportunity_id
+        description: Unique identifier of the opportunity.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: lead_id
+        description: Lead associated with the opportunity.
+        data_tests:
+          - not_null
+
+      - name: account_id
+        description: Account associated with the opportunity.
+        data_tests:
+          - not_null
+
+      - name: stage_name
+        description: Standardized opportunity stage.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Closed Won
+                  - Closed Lost
+                  - Wird Unterschrieben
+                  - Ist Beantragt
+                  - Zu Beraten
+                  - Zu Korrigieren
+
+
+  - name: stg_subscription
+    description: >
+      Subscription records at one row per subscription_id.
+      Source string dates are standardized to DATE while lifecycle
+      inconsistencies are intentionally preserved.
+
+    columns:
+      - name: subscription_id
+        description: Unique identifier of the subscription.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: lead_id
+        description: Lead referenced by the subscription.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_lead')
+                field: lead_id
+              config:
+                severity: warn
+
+      - name: patient_account_id
+        description: Patient/account referenced by the subscription.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_account')
+                field: account_id
+              config:
+                severity: warn
+
+      - name: subscription_status
+        description: Current subscription lifecycle status.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Active
+                  - Cancelled
+                  - Waiting for Approval
+                  - Draft
+                  - On-Hold
+                  - Completed
+
+      - name: delivery_cycle
+        description: Expected recurring delivery frequency.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Monthly
+                  - Bi-Monthly
+                  - Quarterly
+
+      - name: start_date
+        description: Typed subscription start date.
+        data_tests:
+          - not_null
+
+
+  - name: stg_delivery
+    description: >
+      Individual delivery events at one row per delivery_id.
+      Source relationship and lifecycle anomalies are preserved for
+      downstream analysis.
+
+    columns:
+      - name: delivery_id
+        description: Unique identifier of the delivery event.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: subscription_id
+        description: Subscription referenced by the delivery.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_subscription')
+                field: subscription_id
+              config:
+                severity: warn
+
+      - name: delivery_status
+        description: Operational result of the delivery.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Delivered
+                  - Cancelled
+                  - Returned

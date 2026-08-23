@@ -1,0 +1,50 @@
+version: 2
+
+models:
+
+  - name: rep_conversion_funnel_monthly
+    description: >
+      Monthly cohort-based conversion funnel from Lead creation through
+      first delivery. Cohorts are assigned using the original Lead
+      creation month. The funnel follows strict sequential semantics:
+      a Lead can only count at a stage if all preceding stages were also
+      satisfied.
+
+    columns:
+
+      - name: month
+        description: First day of the Lead creation month.
+        data_tests:
+          - not_null
+
+      - name: kpi_name
+        description: Human-readable name of the funnel stage.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Lead Created
+                  - Lead Qualified
+                  - Lead Converted
+                  - Opportunity Won
+                  - Subscription Active
+                  - First Delivery
+
+      - name: funnel_step
+        description: Sequential funnel stage number from 1 to 6.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6]
+
+      - name: count
+        description: Number of Leads in the cohort reaching the funnel stage.
+        data_tests:
+          - not_null
+
+      - name: conversion_from_previous_pct
+        description: >
+          Percentage of Leads progressing from the preceding funnel stage.
+          NULL for stage 1.
