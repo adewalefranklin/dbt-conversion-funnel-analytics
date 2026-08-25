@@ -164,29 +164,37 @@ DELIVERY
 
 The source data contains several characteristics typical of operational CRM systems.
 
-Rather than silently removing every problematic record, the project distinguishes between issues that must be corrected for reliable reporting and issues that should remain visible as source-system quality signals.
+Rather than just removing every problematic record, the project distinguishes between issues that must be corrected for reliable reporting and issues that should remain visible as source-system quality signals.
 
 ---
 
 ## Duplicate Leads
 
-Initial profiling of the raw `LEAD` table identified:
+Initial profiling of the raw `LEAD` source identified duplicate business keys.
 
-| Metric | Count |
-|---|---:|
-| Source rows | 3,268 |
-| Distinct Lead IDs | 3,253 |
-| Duplicate Lead IDs | 15 |
+![Raw Lead duplicate profiling](docs_screenshots/lead_duplicates_profiling_output.png)
 
-The duplicated records were highly similar and differed primarily in timestamps.
+The source contains:
 
-Because the reporting grain requires one business Lead per `lead_id`, a deterministic deduplication rule was introduced in the staging layer.
+- **3,268 source rows**
+- **3,253 distinct Lead IDs**
+- **15 duplicate rows**
 
-The resulting `stg_lead` model contains:
+Because the analytical funnel is defined at one row per Lead, these duplicates would otherwise risk double-counting Leads and inflating downstream conversion metrics.
 
-**3,253 unique leads.**
+The `stg_lead` model therefore applies deterministic deduplication at `lead_id` grain.
 
-This prevents duplicated source records from inflating funnel counts.
+After staging, the result was validated again:
+
+![Lead deduplication validation](docs_screenshots/lead_deduplication_validation.png)
+
+The staged model contains:
+
+- **3,253 rows**
+- **3,253 distinct Lead IDs**
+- **0 remaining duplicates**
+
+This establishes a stable one-row-per-Lead grain before downstream funnel modelling.
 
 ---
 
@@ -228,37 +236,27 @@ This is important because cleaning should improve analytical consistency without
 
 ---
 
-# Referential Integrity Findings
+## Referential Integrity Findings
 
-Relationship testing identified several records whose foreign keys do not resolve to the expected parent entity.
+Relationship profiling identified several foreign-key references that do not resolve to the expected parent entities.
 
-| Relationship | Unmatched records |
-|---|---:|
-| Subscription → Lead | 7 |
-| Subscription → Account | 13 |
-| Delivery → Subscription | 3 |
+The analysis identified:
 
-These are treated as **source-data quality issues**, not transformation failures.
+- **7** Subscriptions referencing unmatched Leads
+- **13** Subscriptions referencing unmatched Accounts
+- **3** Deliveries referencing unmatched Subscriptions
 
-The corresponding dbt relationship tests therefore use:
+![Referential integrity profiling](docs_screenshots/source_data_quality_findings.png)
 
-```yaml
-severity: warn
-```
+These records are treated as **source-data quality issues rather than transformation failures**. Removing them silently would hide potentially important operational data-quality problems and could distort downstream analysis.
 
-rather than failing the complete pipeline.
+The corresponding dbt `relationships` tests are therefore configured with `severity: warn`.
 
-This decision is deliberate.
+Running the tests confirms that the expected integrity issues are detected while the remaining staging tests pass:
 
-Dropping the records would hide genuine CRM quality problems, while treating them as fatal errors would prevent otherwise valid analytical data from being processed.
+![dbt relationship test warnings](docs_screenshots/referential_integrity_warnings.png)
 
-The pipeline therefore:
-
-- preserves the anomalous records,
-- exposes the integrity violations through dbt tests,
-- prevents them from silently influencing relationships that cannot be established,
-- allows the overall analytical build to complete.
-
+This approach allows the pipeline to remain executable while making known source-system integrity issues explicit, testable, and visible to downstream users.
 ---
 
 # Funnel Definition
