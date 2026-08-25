@@ -484,6 +484,12 @@ conversion_from_previous_pct = NULL
 because there is no preceding stage.
 
 ---
+### Executed Model Output
+
+The final model was executed directly with `dbt show`, confirming the
+six-stage cohort structure and stage-to-stage conversion metrics.
+
+![Executed conversion funnel model](docs_screenshots/funnel_model_output.png)
 
 # Example Output
 
