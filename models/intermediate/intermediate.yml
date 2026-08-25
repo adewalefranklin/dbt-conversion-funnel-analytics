@@ -3,7 +3,7 @@ version: 2
 models:
 
   - name: int_lead_opportunity
-    description: >
+    description:
       Enriched sales opportunity model at one row per opportunity.
       Multiple legitimate opportunities per Lead are preserved.
 
@@ -14,7 +14,7 @@ models:
           - not_null
 
   - name: int_subscription_enriched
-    description: >
+    description:
       Subscription-level model enriched with Lead and Account context.
       Unmatched parent relationships are intentionally retained.
 
@@ -25,7 +25,7 @@ models:
           - not_null
 
   - name: int_delivery_enriched
-    description: >
+    description:
       Delivery-level model enriched with subscription, Lead and Account
       context while preserving orphaned delivery relationships.
 
@@ -36,7 +36,7 @@ models:
           - not_null
 
   - name: int_lead_funnel
-    description: >
+    description:
       One-row-per-Lead analytical model containing independent business
       flags used to construct the strict sequential conversion funnel.
 
