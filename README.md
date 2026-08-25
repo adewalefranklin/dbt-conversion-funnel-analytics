@@ -492,7 +492,7 @@ six-stage cohort structure and stage-to-stage conversion metrics.
 ![Executed conversion funnel model](docs_screenshots/funnel_model_output.png)
 
 
-This means that of the 140 Leads acquired in July 2023:
+For the July 2023 cohort of 140 created leads:
 
 - 110 became Qualified,
 - 65 became Converted,
