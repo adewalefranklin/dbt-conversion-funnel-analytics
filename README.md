@@ -491,18 +491,6 @@ six-stage cohort structure and stage-to-stage conversion metrics.
 
 ![Executed conversion funnel model](docs_screenshots/funnel_model_output.png)
 
-# Example Output
-
-An example cohort produced by the model:
-
-| month | kpi_name | funnel_step | count | conversion_from_previous_pct |
-|---|---|---:|---:|---:|
-| 2023-07-01 | Lead Created | 1 | 140 | NULL |
-| 2023-07-01 | Lead Qualified | 2 | 110 | 78.57 |
-| 2023-07-01 | Lead Converted | 3 | 65 | 59.09 |
-| 2023-07-01 | Opportunity Won | 4 | 41 | 63.08 |
-| 2023-07-01 | Subscription Active | 5 | 20 | 48.78 |
-| 2023-07-01 | First Delivery | 6 | 20 | 100.00 |
 
 This means that of the 140 Leads acquired in July 2023:
 
