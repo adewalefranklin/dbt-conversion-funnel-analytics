@@ -865,6 +865,24 @@ dbt show --select rep_conversion_funnel_monthly --profiles-dir .
 
 ---
 
+## dbt Lineage
+
+The project follows a layered dbt architecture separating source cleaning,
+entity enrichment, funnel construction, and reporting logic.
+
+The staging layer standardizes and validates the CRM source entities.
+Intermediate models resolve the relationships between leads, opportunities,
+subscriptions, accounts, and deliveries. `int_lead_funnel` consolidates these
+relationships at lead grain and applies the funnel-stage indicators.
+
+The final `rep_conversion_funnel_monthly` model aggregates the lead-level
+funnel into monthly lead cohorts and calculates conversion between consecutive
+funnel stages.
+
+![dbt Lineage Graph](docs_screenshots/dbt_lineage.png)
+
+---
+
 # Technology Stack
 
 | Technology | Purpose |
