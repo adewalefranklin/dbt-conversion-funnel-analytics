@@ -469,7 +469,7 @@ The conversion calculation is:
 
 ```text
 current stage count
-------------------- × 100
+         /              × 100
 previous stage count
 ```
 
@@ -630,7 +630,7 @@ Staging and intermediate models could be processed incrementally using source mo
 LAST_MODIFIED_DATE
 ```
 
-However, the final cohort model should not simply process the newest Lead month.
+Though the final cohort model should not simply process the newest Lead month.
 
 Historical cohorts remain mutable.
 
@@ -640,8 +640,8 @@ The production process must therefore identify changes in downstream entities an
 
 Two practical strategies are possible:
 
-1. recompute a rolling historical window, or
-2. identify affected Lead IDs from changed upstream records and selectively rebuild their corresponding cohort months.
+1. Recalculate a rolling historical window
+2. Detect impacted Lead IDs from upstream changes and rebuild only the affected cohort months.
 
 For larger production datasets, the second approach would reduce unnecessary processing.
 
@@ -680,7 +680,7 @@ Subscription status may change over time.
 
 A cancelled or inactive subscription could later become active again.
 
-This introduces an important distinction between:
+This introduces an important distinction/diference between:
 
 ```text
 Current state
@@ -689,7 +689,7 @@ Current state
 and:
 
 ```text
-Ever reached stage
+Highest stage reached
 ```
 
 The supplied dataset does not provide a complete event history for every lifecycle transition.
@@ -705,7 +705,7 @@ Subscription Active
 means:
 
 - currently active, or
-- has ever reached active status.
+- whether it ever reached active status.
 
 If historical funnel achievement is required, subscription status history or event-level data should be retained rather than relying only on the latest CRM state.
 
@@ -715,7 +715,7 @@ If historical funnel achievement is required, subscription status history or eve
 
 The transformation logic is deterministic.
 
-Given an unchanged source snapshot:
+When there are no changes in the source data:
 
 ```bash
 dbt build --profiles-dir .
@@ -731,13 +731,13 @@ This is particularly useful for the current dataset size because full recomputat
 
 # Assumptions and Trade-offs
 
-Several decisions were made explicitly under uncertainty.
+Several modeling decisions were made using clearly stated assumptions.
 
 ### Duplicate Leads
 
 Duplicate Lead IDs are interpreted as duplicate source records rather than separate business entities.
 
-A deterministic rule establishes one Lead record per `lead_id`.
+A deterministic deduplication rule retains one Lead record per lead_id.
 
 ### Opportunity Stage Cleaning
 
@@ -747,7 +747,7 @@ The original value is retained for traceability.
 
 ### Referential Integrity
 
-Broken relationships are surfaced rather than silently removed.
+Broken relationships are flagged instead of being silently dropped.
 
 Known violations generate dbt warnings instead of blocking the complete pipeline.
 
